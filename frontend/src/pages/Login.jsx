@@ -13,12 +13,16 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const token = localStorage.getItem('token');
-    console.log("login",token)
 
     try {
       await axios.post('http://localhost:3000/api/users/login', { email, password });
       navigate('/');
+      const res = await axios.post('http://localhost:3000/api/users/login', { email, password });
+
+      console.log("Response is", res)
+
+      localStorage.setItem("token", res.data.token)
+      console.log("Token is", localStorage.getItem("token"))
     } catch (error) {
       setError('Invalid email or password. Please try again.');
       console.error('Error during login:', error);
@@ -53,15 +57,15 @@ const Login = () => {
               required
             />
           </label>
-          <button 
-            type="submit" 
-            className={`btn-primary w-full p-2 rounded-md text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`} 
+          <button
+            type="submit"
+            className={`btn-primary w-full p-2 rounded-md text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
             disabled={loading}
           >
             {loading ? 'Logging In...' : 'Login'}
           </button>
           <p className="text-center mt-4">
-            Don't have an account? 
+            Don't have an account?
             <a href="/signup" className="text-blue-600 hover:underline"> Sign up</a>
           </p>
         </form>

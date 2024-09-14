@@ -13,8 +13,11 @@ const Home = () => {
   useEffect(() => {
     // Check if the user is authenticated
     const token = localStorage.getItem('token');
+    console.log('Stored token:', token); // Debug log
+
     if (!token) {
       // Redirect to login if not authenticated
+      console.error('No token found. Redirecting to login.');
       navigate('/login');
       return;
     }
@@ -27,16 +30,24 @@ const Home = () => {
         'Authorization': `Bearer ${token}`
       }
     })
-      .then(response => {
-        console.log('API response:', response.data);
-        if (Array.isArray(response.data)) {
-          setEvents(response.data);
-        } else {
-          console.error('Unexpected response format:', response.data);
-        }
-      })
-      .catch(error => console.error('Error fetching events:', error))
-      .finally(() => setLoading(false)); // Set loading to false after fetching
+    .then(response => {
+      console.log('API response:', response.data); // Debug log
+      if (Array.isArray(response.data)) {
+        setEvents(response.data);
+      } else {
+        console.error('Unexpected response format:', response.data);
+      }
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 401) {
+        // Handle unauthorized access
+        console.error('Unauthorized access. Redirecting to login.');
+        navigate('/login');
+      } else {
+        console.error('Error fetching events:', error);
+      }
+    })
+    .finally(() => setLoading(false)); // Set loading to false after fetching
   }, [navigate]);
 
   if (!isAuthenticated) {
@@ -76,7 +87,7 @@ const Home = () => {
                     <FaMapMarkerAlt className="text-gray-500 mr-2" />
                     <p className="text-gray-500">Venue: {event.venue}</p>
                   </div>
-                  <Link to={`/current-event/${event._id}`} className="text-blue-500 hover:underline mt-4 block">View Details</Link>
+                  <Link to={`/view/${event._id}`} className="text-blue-500 hover:underline mt-4 block">View Details</Link>
                 </div>
               ))
             ) : (

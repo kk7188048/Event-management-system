@@ -6,7 +6,8 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import ScheduleEvent from './pages/ScheduleEvent';
 import { NotificationProvider } from './components/Notification';
-
+import { Footer } from 'flowbite-react';
+import EventDetails from './pages/View';
 function App() {
   return (
     <NotificationProvider>
@@ -16,8 +17,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
           <Route path="/schedule-event" element={<ScheduleEvent />} />
+          <Route path="/view/:eventId" element={<EventDetails />} />
+
         </Routes>
       </Router>
+      <Footer />
     </NotificationProvider>
   );
 }
