@@ -64,38 +64,6 @@ exports.createEvent = async (req, res) => {
   }
 };
 
-// Confirm RSVP
-exports.confirmRsvp = async (req, res) => {
-  const { eventId, token } = req.params;
-
-  try {
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
-    }
-
-    const attendee = event.attendees.find(a => a.confirmationToken === token);
-    if (!attendee) {
-      return res.status(400).json({ message: 'Invalid or expired confirmation token' });
-    }
-
-    attendee.rsvpStatus = 'confirmed';
-    attendee.confirmationToken = null; // Clear the token after confirmation
-
-    await event.save();
-
-    // Log activity
-    await UserActivity.create({
-      userId: req.user._id, // Assuming req.user is available
-      action: 'confirm_rsvp',
-      details: `RSVP confirmed for ${attendee.email} for event: ${event.title}`,
-    });
-
-    res.status(200).json({ message: 'RSVP confirmed successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
 // Send reminder to all attendees
 exports.sendReminder = async (req, res) => {
@@ -206,6 +174,66 @@ exports.addAttendee = async (req, res) => {
 
     res.status(201).json({ message: 'Attendee added and confirmation email sent' });
   } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.confirmRsvp = async (req, res) => {
+  const { eventId, token } = req.params;
+
+  try {
+    // Log the incoming request data
+    console.log('Event ID:', eventId);
+    console.log('Confirmation Token:', token);
+
+    // Fetch the event by ID
+    const event = await Event.findById(eventId);
+    if (!event) {
+      console.log('Event not found');
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    // Log the event details for debugging
+    console.log('Event found:', event.title, event.attendees);
+
+    // Find the attendee with the matching token
+    const attendee = event.attendees.find(a => a.confirmationToken === token);
+    if (!attendee) {
+      console.log('Invalid or expired token');
+      return res.status(400).json({ message: 'Invalid or expired confirmation token' });
+    }
+
+    // Log the attendee details for debugging
+    console.log('Attendee found:', attendee);
+
+    // Update the RSVP status and clear the token
+    attendee.rsvpStatus = 'confirmed';
+    attendee.confirmationToken = null; // Clear the token after confirmation
+
+    // Save the updated event
+    await event.save();
+
+    // Log the user activity for RSVP confirmation
+    console.log('RSVP confirmed for:', attendee.email);
+
+    // Log the user activity (make sure req.user._id exists)
+    if (req.user && req.user._id) {
+      await UserActivity.create({
+        userId: req.user._id, // Assuming req.user is available
+        action: 'confirm_rsvp',
+        details: `RSVP confirmed for ${attendee.email} for event: ${event.title}`,
+      });
+      console.log('User activity logged for confirmation');
+    } else {
+      console.log('req.user is not available or missing _id');
+    }
+
+    // Send success response
+    res.status(200).json({ message: 'RSVP confirmed successfully' });
+
+  } catch (err) {
+    // Log any errors that occur
+    console.error('Error in confirming RSVP:', err);
     res.status(500).json({ message: err.message });
   }
 };
