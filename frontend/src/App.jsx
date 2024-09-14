@@ -1,24 +1,24 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import EventList from './components/EventList';
-import CreateEvent from './components/CreateEvent';
+import SignUp from './pages/Signup';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import ScheduleEvent from './pages/ScheduleEvent';
+import { NotificationProvider } from './components/Notification';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
-        <header className="bg-blue-600 p-4 text-white text-center">
-          <h1 className="text-2xl font-bold">Event Management System</h1>
-        </header>
-        <main>
-          <Routes>
-            <Route path="/" element={<EventList />} />
-            <Route path="/create-event" element={<CreateEvent />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <NotificationProvider>
+      <Router>
+        <Routes>
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/schedule-event" element={<ScheduleEvent />} />
+        </Routes>
+      </Router>
+    </NotificationProvider>
   );
 }
 
